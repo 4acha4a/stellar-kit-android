@@ -241,6 +241,10 @@ class StellarKit(
         return transaction.toEnvelopeXdrBase64()
     }
 
+    fun getTransaction(transactionEnvelope: String): Transaction {
+        return Transaction.fromEnvelopeXdr(transactionEnvelope, stellarNetwork) as Transaction
+    }
+
     fun doesAccountExist(accountId: String) = try {
         val destination = KeyPair.fromAccountId(accountId)
         server.accounts().account(destination.accountId)

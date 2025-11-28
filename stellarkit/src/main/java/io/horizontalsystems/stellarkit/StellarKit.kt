@@ -263,7 +263,9 @@ class StellarKit(
         sendTransaction(transactionBuilder.build())
     }
 
-    private fun sendRawTransaction(transaction: Transaction) {
+    fun sendRawTransaction(transactionEnvelope: String) {
+        val transaction = Transaction.fromEnvelopeXdr(transactionEnvelope, stellarNetwork)
+        check(transaction is Transaction)
         try {
             val response = server.submitTransaction(transaction)
             Log.e("AAA", "Success! $response")

@@ -176,6 +176,58 @@ class StellarKit(
         sendTransaction(changeTrustOperation, memo)
     }
 
+    fun createUnsignedTxAssetBase64(assetId: String, destination: String, amount: BigDecimal, memo: String?): String {
+        val asset = Asset.create(assetId)
+
+        val operation = PaymentOperation.builder()
+            .destination(destination)
+            .asset(asset)
+            .amount(amount)
+            .build()
+
+        val sourceAccount = server.accounts().account(accountId)
+
+        val transactionBuilder = TransactionBuilder(sourceAccount, stellarNetwork)
+            .addOperation(operation)
+            .setTimeout(180)
+            .setBaseFee(Transaction.MIN_BASE_FEE)
+
+        memo?.let {
+            transactionBuilder.addMemo(Memo.text(memo))
+        }
+
+        return transactionBuilder.build().toEnvelopeXdrBase64()
+    }
+
+    fun createUnsignedTxNativeBase64(amount: BigDecimal, address: String, memo: String?): String {
+        val destination = KeyPair.fromAccountId(address)
+        val operation = if (doesAccountExist(address)) {
+            PaymentOperation.builder()
+                .destination(destination.accountId)
+                .asset(AssetTypeNative())
+                .amount(amount)
+                .build()
+        } else {
+            CreateAccountOperation.builder()
+                .destination(destination.accountId)
+                .startingBalance(amount)
+                .build()
+        }
+
+        val sourceAccount = server.accounts().account(accountId)
+
+        val transactionBuilder = TransactionBuilder(sourceAccount, stellarNetwork)
+            .addOperation(operation)
+            .setTimeout(180)
+            .setBaseFee(Transaction.MIN_BASE_FEE)
+
+        memo?.let {
+            transactionBuilder.addMemo(Memo.text(memo))
+        }
+
+        return transactionBuilder.build().toEnvelopeXdrBase64()
+    }
+
     private fun payment(asset: Asset, recipient: String, amount: BigDecimal, memo: String?) {
         val destination = KeyPair.fromAccountId(recipient)
 

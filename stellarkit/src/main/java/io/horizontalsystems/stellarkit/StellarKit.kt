@@ -263,6 +263,16 @@ class StellarKit(
         sendTransaction(transactionBuilder.build())
     }
 
+    private fun sendRawTransaction(transaction: Transaction) {
+        try {
+            val response = server.submitTransaction(transaction)
+            Log.e("AAA", "Success! $response")
+        } catch (e: Exception) {
+            Log.e("AAA", "Something went wrong!", e)
+            throw e
+        }
+    }
+
     private fun sendTransaction(transaction: Transaction) {
         if (!keyPair.canSign()) throw WalletError.WatchOnly
 

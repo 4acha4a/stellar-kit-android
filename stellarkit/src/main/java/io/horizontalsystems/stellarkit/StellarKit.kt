@@ -176,6 +176,28 @@ class StellarKit(
         sendTransaction(changeTrustOperation, memo)
     }
 
+    fun createChangeTrustTxBase64(assetId: String, memo: String?): String {
+        val asset = Asset.create(assetId)
+
+        val changeTrustOperation = ChangeTrustOperation.builder()
+            .asset(ChangeTrustAsset(asset))
+            .limit(BigDecimal("922337203685.4775807")) // max int64(922337203685.4775807)
+            .build()
+
+        val sourceAccount = server.accounts().account(accountId)
+
+        val transactionBuilder = TransactionBuilder(sourceAccount, stellarNetwork)
+            .addOperation(changeTrustOperation)
+            .setTimeout(180)
+            .setBaseFee(Transaction.MIN_BASE_FEE)
+
+        memo?.let {
+            transactionBuilder.addMemo(Memo.text(memo))
+        }
+
+        return transactionBuilder.build().toEnvelopeXdrBase64()
+    }
+
     fun createUnsignedTxAssetBase64(assetId: String, destination: String, amount: BigDecimal, memo: String?): String {
         val asset = Asset.create(assetId)
 
